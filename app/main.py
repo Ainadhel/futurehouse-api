@@ -2,7 +2,7 @@ from fastapi import FastAPI, Header, HTTPException
 from futurehouse_client import FutureHouseClient
 
 app = FastAPI()
-client = FuturehouseClient()  # Ajuste avec des clés si besoin
+client = FutureHouseClient()
 
 import os
 
