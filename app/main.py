@@ -1,12 +1,19 @@
+import os
 from fastapi import FastAPI, Header, HTTPException
 from futurehouse_client import FutureHouseClient
 
 app = FastAPI()
-client = FutureHouseClient()
 
-import os
-
+# Clé API HTTP sécurisée (utilisée dans les headers x-api-key)
 API_KEY = os.getenv("API_KEY", "default-api-key")
+
+# Clé API Futurehouse pour authentification SDK
+FUTUREHOUSE_API_KEY = os.getenv("FUTUREHOUSE_API_KEY")
+if not FUTUREHOUSE_API_KEY:
+    raise RuntimeError("La variable d'environnement FUTUREHOUSE_API_KEY est manquante.")
+
+# Création du client FutureHouse
+client = FutureHouseClient(api_key=FUTUREHOUSE_API_KEY)
 
 @app.get("/projects")
 def list_projects(x_api_key: str = Header(...)):
