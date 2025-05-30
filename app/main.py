@@ -19,3 +19,7 @@ def get_project(project_id: str, x_api_key: str = Header(...)):
     if x_api_key != API_KEY:
         raise HTTPException(status_code=403, detail="Clé API invalide")
     return client.projects.get(project_id)
+
+@app.get("/health")
+def healthcheck():
+    return {"status": "ok"}
