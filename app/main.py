@@ -28,8 +28,7 @@ def run_task_endpoint(data: TaskRequest, x_api_key: str = Header(...)):
         raise HTTPException(status_code=403, detail="Clé API invalide")
 
     try:
-        # Exécute la tâche simple (OWL, HALLUCINATION, etc.)
-        result = client.simple_task.run(
+        result = client.run(
             name=data.name,
             query=data.query
         )
