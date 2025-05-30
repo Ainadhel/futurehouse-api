@@ -1,0 +1,11 @@
+services:
+  - name: futurehouse-api
+    type: webservice
+    source:
+      type: git
+      repo: https://github.com/ton-org/futurehouse-api.git
+    dockerfile: Dockerfile
+    port: 3000
+    expose: true
+    domains:
+      - api.tondomaine.fr
