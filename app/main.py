@@ -1,22 +1,17 @@
 import os
 from fastapi import FastAPI, Header, HTTPException
 from pydantic import BaseModel
-from futurehouse_client import FutureHouseClient
+from futurehouse_client.simple import run_task  # ✅ import direct
+from futurehouse_client.enums import JobNames
 
 app = FastAPI()
 
-# Clé API HTTP sécurisée
 API_KEY = os.getenv("API_KEY", "default-api-key")
-
-# Clé API Futurehouse
 FUTUREHOUSE_API_KEY = os.getenv("FUTUREHOUSE_API_KEY")
 if not FUTUREHOUSE_API_KEY:
     raise RuntimeError("FUTUREHOUSE_API_KEY manquant")
 
-# Création du client FutureHouse
-client = FutureHouseClient(api_key=FUTUREHOUSE_API_KEY)
-
-# ----- Endpoint générique de tâche -----
+# ---- Endpoint générique pour lancer un job simple ----
 
 class TaskRequest(BaseModel):
     name: str
@@ -28,15 +23,19 @@ def run_task_endpoint(data: TaskRequest, x_api_key: str = Header(...)):
         raise HTTPException(status_code=403, detail="Clé API invalide")
 
     try:
-        result = client.run(
-            name=data.name,
+        job_enum = JobNames[data.name]
+    except KeyError:
+        raise HTTPException(status_code=400, detail=f"Nom de tâche invalide : {data.name}")
+
+    try:
+        result = run_task(  # ✅ appel direct ici
+            api_key=FUTUREHOUSE_API_KEY,
+            name=job_enum,
             query=data.query
         )
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
-# ----- Healthcheck -----
 
 @app.get("/health")
 def healthcheck():
