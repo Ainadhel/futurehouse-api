@@ -1,9 +1,8 @@
 import os
-from fastapi import FastAPI, Header, HTTPException
+from fastapi import FastAPI, Header, HTTPException, Body
 from pydantic import BaseModel
 from typing import Any, Dict
 from futurehouse_client import FutureHouseClient
-from futurehouse_client.enums import JobNames
 
 app = FastAPI()
 
@@ -22,20 +21,23 @@ client = FutureHouseClient(api_key=FUTUREHOUSE_API_KEY)
 
 class TaskRequest(BaseModel):
     name: str
-    payload: Dict[str, Any]
+    query: str
 
 @app.post("/run-task")
 def run_task(data: TaskRequest, x_api_key: str = Header(...)):
     if x_api_key != API_KEY:
         raise HTTPException(status_code=403, detail="Clé API invalide")
 
-    try:
-        job_enum = JobNames[data.name]  # Convertit "OWL" → JobNames.OWL
-    except KeyError:
-        raise HTTPException(status_code=400, detail=f"Nom de tâche invalide : {data.name}")
+    task_data = {
+        "name": data.name,   # exemple : "OWL"
+        "query": data.query  # exemple : "Has anyone tested..."
+    }
 
-    result = client.run(job_enum, **data.payload)
-    return result
+    try:
+        result = client.tasks.run(task_data)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 # ---- 🧪 Healthcheck ----
 
