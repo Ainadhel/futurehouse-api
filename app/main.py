@@ -4,7 +4,9 @@ from futurehouse.client import FuturehouseClient
 app = FastAPI()
 client = FuturehouseClient()  # Ajuste avec des clés si besoin
 
-API_KEY = "ma-cle-api-ultrasecrete"  # Change-la évidemment
+import os
+
+API_KEY = os.getenv("API_KEY", "default-api-key")
 
 @app.get("/projects")
 def list_projects(x_api_key: str = Header(...)):
