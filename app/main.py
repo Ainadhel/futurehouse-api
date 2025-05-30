@@ -1,7 +1,7 @@
 import os
 from fastapi import FastAPI, Header, HTTPException
 from pydantic import BaseModel
-from futurehouse_client.tasks import run_task
+from futurehouse_client import FutureHouseClient
 
 app = FastAPI()
 
@@ -12,6 +12,9 @@ API_KEY = os.getenv("API_KEY", "default-api-key")
 FUTUREHOUSE_API_KEY = os.getenv("FUTUREHOUSE_API_KEY")
 if not FUTUREHOUSE_API_KEY:
     raise RuntimeError("FUTUREHOUSE_API_KEY manquant")
+
+# Création du client FutureHouse
+client = FutureHouseClient(api_key=FUTUREHOUSE_API_KEY)
 
 # ----- Endpoint générique de tâche -----
 
@@ -25,8 +28,8 @@ def run_task_endpoint(data: TaskRequest, x_api_key: str = Header(...)):
         raise HTTPException(status_code=403, detail="Clé API invalide")
 
     try:
-        result = run_task(
-            api_key=FUTUREHOUSE_API_KEY,
+        # Exécute la tâche simple (OWL, HALLUCINATION, etc.)
+        result = client.simple_task.run(
             name=data.name,
             query=data.query
         )
