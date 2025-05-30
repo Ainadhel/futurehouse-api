@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Header, HTTPException
-from futurehouse.client import FuturehouseClient
+from futurehouse_client import FutureHouseClient
 
 app = FastAPI()
 client = FuturehouseClient()  # Ajuste avec des clés si besoin
