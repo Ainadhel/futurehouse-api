@@ -1,5 +1,8 @@
 FROM python:3.11-slim
 
+# Ajout de curl pour permettre à Coolify de vérifier la santé du conteneur
+RUN apt-get update && apt-get install -y curl --no-install-recommends && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
 COPY requirements.txt .
