@@ -1,40 +1,40 @@
 import os
 from fastapi import FastAPI, Header, HTTPException
 from pydantic import BaseModel
-from typing import Literal
-from futurehouse_client import FutureHouseClient
+from futurehouse_client.tasks import run_task
 
 app = FastAPI()
 
-# Clé API HTTP sécurisée (utilisée dans les headers x-api-key)
+# Clé API HTTP sécurisée
 API_KEY = os.getenv("API_KEY", "default-api-key")
 
-# Clé API Futurehouse pour authentification SDK
+# Clé API Futurehouse
 FUTUREHOUSE_API_KEY = os.getenv("FUTUREHOUSE_API_KEY")
 if not FUTUREHOUSE_API_KEY:
-    raise RuntimeError("La variable d'environnement FUTUREHOUSE_API_KEY est manquante.")
+    raise RuntimeError("FUTUREHOUSE_API_KEY manquant")
 
-# Création du client FutureHouse
-client = FutureHouseClient(api_key=FUTUREHOUSE_API_KEY)
-
-# ---- 🔽 Endpoint pour exécuter un job ----
+# ----- Endpoint générique de tâche -----
 
 class TaskRequest(BaseModel):
-    name: str  # ex: "OWL"
+    name: str
     query: str
 
 @app.post("/run-task")
-def run_task(data: TaskRequest, x_api_key: str = Header(...)):
+def run_task_endpoint(data: TaskRequest, x_api_key: str = Header(...)):
     if x_api_key != API_KEY:
         raise HTTPException(status_code=403, detail="Clé API invalide")
 
     try:
-        result = client.run(name=data.name, query=data.query)
+        result = run_task(
+            api_key=FUTUREHOUSE_API_KEY,
+            name=data.name,
+            query=data.query
+        )
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# ---- 🧪 Healthcheck ----
+# ----- Healthcheck -----
 
 @app.get("/health")
 def healthcheck():
